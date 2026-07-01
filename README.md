@@ -1,4 +1,4 @@
-# SQL Query Runtime Predictor 🚀
+# SQL Query Runtime Predictor 
 
 A resume-worthy Machine Learning and Database Systems intersection project that programmatically generates thousands of SQL queries of varying complexity, executes them against a seeded MySQL database, extracts deep query optimizer features using execution plans (`EXPLAIN`), and trains classical machine learning models (Linear Regression, Random Forest, XGBoost) to predict SQL execution times.
 
