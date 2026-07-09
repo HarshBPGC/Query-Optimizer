@@ -159,19 +159,4 @@ Recommendations:
 
 ---
 
-## 🌐 Vercel Web Deployment & Web UI
-
-We have added a modern, glassmorphic Web UI dashboard that runs the compiled XGBoost predictor directly in the browser and connects to the serverless backend.
-
-### 1. Deploy to Vercel
-Simply push this repository to GitHub and link it to your **Vercel** account. Vercel will automatically read `vercel.json` and deploy both the frontend dashboard and the serverless MySQL parsing endpoint (`/api/explain`).
-
-### 2. Run Web UI Locally
-To run the web interface and the serverless functions locally with a single command (no Vercel account or setup required):
-```bash
-python local_server.py
-```
-Then open [http://localhost:3000](http://localhost:3000) in your browser.
-- **Simulator Mode:** Type queries and slide features to see how prediction shifts in real time.
-- **Live DB Mode:** Test real MySQL queries directly. Enter database connection details in the UI and click **Test Connection** / run queries.
 
