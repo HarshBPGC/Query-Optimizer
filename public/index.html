@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Query Runtime Predictor & Optimizer Advisor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Header -->
+        <header class="app-header">
+            <div class="logo-container">
+                <div class="logo-icon">⚡</div>
+                <h1>SQL Optimizer Advisor</h1>
+            </div>
+            <p class="tagline">Predict database query performance & optimize runtimes using ML</p>
+        </header>
+
+        <!-- Main Workspace Grid -->
+        <main class="dashboard-grid">
+            
+            <!-- Left Side: Controls & Query Input -->
+            <section class="control-panel">
+                <!-- Query Editor -->
+                <div class="card glass">
+                    <div class="card-header">
+                        <h2>SQL Query Editor</h2>
+                        <div class="quick-samples">
+                            <label for="sample-select">Quick Sample:</label>
+                            <select id="sample-select">
+                                <option value="sample1">Single table, no index (Slow)</option>
+                                <option value="sample2">Single table, indexed (Fast)</option>
+                                <option value="sample3">1 JOIN query (Medium)</option>
+                                <option value="sample4">2 JOINs complex query (Very Slow)</option>
+                                <option value="custom" selected>Write Custom Query...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="editor-container">
+                        <textarea id="query-input" placeholder="SELECT * FROM Orders O WHERE O.status = 'Completed'..." spellcheck="false"></textarea>
+                    </div>
+                </div>
+
+                <!-- Analysis Mode -->
+                <div class="card glass">
+                    <div class="card-header">
+                        <h2>Analysis Mode</h2>
+                    </div>
+                    <div class="mode-toggles">
+                        <button id="mode-simulator" class="btn btn-toggle active">
+                            <span class="btn-icon">⚙️</span>
+                            <div class="btn-text">
+                                <strong>Simulator Mode</strong>
+                                <small>Interactive ML Sandbox</small>
+                            </div>
+                        </button>
+                        <button id="mode-live" class="btn btn-toggle">
+                            <span class="btn-icon">🛢️</span>
+                            <div class="btn-text">
+                                <strong>Live DB Mode</strong>
+                                <small>Run EXPLAIN on MySQL</small>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live DB Connection Settings -->
+                <div id="db-settings-card" class="card glass disabled">
+                    <div class="card-header">
+                        <h2>Database Connection</h2>
+                        <span id="db-status-badge" class="badge badge-error">Disconnected</span>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="db-host">Host</label>
+                            <input type="text" id="db-host" placeholder="127.0.0.1" value="127.0.0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="db-port">Port</label>
+                            <input type="text" id="db-port" placeholder="3306" value="3306">
+                        </div>
+                        <div class="form-group col-span-2">
+                            <label for="db-user">Username</label>
+                            <input type="text" id="db-user" placeholder="root" value="root">
+                        </div>
+                        <div class="form-group col-span-2">
+                            <label for="db-password">Password</label>
+                            <input type="password" id="db-password" placeholder="••••••••">
+                        </div>
+                        <div class="form-group col-span-2">
+                            <label for="db-name">Database Name</label>
+                            <input type="text" id="db-name" placeholder="sql_ml_db" value="sql_ml_db">
+                        </div>
+                    </div>
+                    <div class="form-footer">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="save-credentials" checked>
+                            <span class="checkmark"></span>
+                            Save credentials locally
+                        </label>
+                        <button id="test-connection-btn" class="btn btn-secondary">Test Connection</button>
+                    </div>
+                </div>
+
+                <!-- Simulator Controls -->
+                <div id="simulator-settings-card" class="card glass">
+                    <div class="card-header">
+                        <h2>Simulation Controls</h2>
+                        <span class="badge badge-info">Interactive</span>
+                    </div>
+                    <div class="sliders-list">
+                        <div class="slider-group">
+                            <div class="slider-info">
+                                <label for="sim-rows">Estimated Rows Scanned</label>
+                                <span id="val-sim-rows" class="slider-value">1,000</span>
+                            </div>
+                            <input type="range" id="sim-rows" min="1" max="10000000" step="1" value="1000">
+                            <div class="slider-labels">
+                                <span>1</span>
+                                <span>10k</span>
+                                <span>1M</span>
+                                <span>10M</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-info">
+                                <label for="sim-index">Uses Index?</label>
+                                <div class="switch-container">
+                                    <input type="checkbox" id="sim-index" checked>
+                                    <span class="switch-slider"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-info">
+                                <label for="sim-filtered">Estimated Filter Effectiveness</label>
+                                <span id="val-sim-filtered" class="slider-value">100%</span>
+                            </div>
+                            <input type="range" id="sim-filtered" min="0" max="100" value="100">
+                            <div class="slider-labels">
+                                <span>0% (Precise)</span>
+                                <span>50%</span>
+                                <span>100% (Broad)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Side: Predictions, Charts & Recommendations -->
+            <section class="results-panel">
+                
+                <!-- Main Prediction Output -->
+                <div class="card glass glow-card">
+                    <div class="card-header">
+                        <h2>ML Runtime Forecast</h2>
+                        <span class="badge badge-success">XGBoost Active</span>
+                    </div>
+                    <div class="prediction-display">
+                        <div class="gauge-container">
+                            <svg class="gauge-svg" viewBox="0 0 100 100">
+                                <circle class="gauge-bg" cx="50" cy="50" r="40"></circle>
+                                <circle id="gauge-fill" class="gauge-fill" cx="50" cy="50" r="40"></circle>
+                            </svg>
+                            <div class="gauge-text">
+                                <div id="predicted-runtime" class="runtime-val">--</div>
+                                <div class="runtime-unit">milliseconds</div>
+                            </div>
+                        </div>
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <div class="metric-label">Estimated Rows</div>
+                                <div id="metric-rows" class="metric-value">--</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Uses Index</div>
+                                <div id="metric-index" class="metric-value">--</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Table Count</div>
+                                <div id="metric-tables" class="metric-value">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Query Advisor Recommendations -->
+                <div class="card glass">
+                    <div class="card-header">
+                        <h2>Query Optimizer Advisor</h2>
+                    </div>
+                    <div id="recommendations-container" class="recommendations-list">
+                        <!-- Recommendation items will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Feature Values Breakdown -->
+                <div class="card glass">
+                    <div class="card-header">
+                        <h2>Model Feature Breakdown</h2>
+                    </div>
+                    <div id="features-breakdown" class="features-grid">
+                        <!-- Feature items will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Performance Charts & Model Stats -->
+                <div class="card glass">
+                    <div class="card-header">
+                        <h2>Performance Comparison</h2>
+                    </div>
+                    <div class="chart-container">
+                        <svg id="bar-chart-svg" viewBox="0 0 500 240" class="chart-svg"></svg>
+                    </div>
+                    <div class="model-stats-table-container">
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Model Name</th>
+                                    <th>MAE (ms)</th>
+                                    <th>RMSE (ms)</th>
+                                    <th>R² Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>XGBoost (Winner)</strong></td>
+                                    <td>13.10 ms</td>
+                                    <td>26.61 ms</td>
+                                    <td>0.7714</td>
+                                </tr>
+                                <tr>
+                                    <td>Random Forest</td>
+                                    <td>12.31 ms</td>
+                                    <td>26.71 ms</td>
+                                    <td>0.7697</td>
+                                </tr>
+                                <tr>
+                                    <td>Linear Regression</td>
+                                    <td>25.87 ms</td>
+                                    <td>48.08 ms</td>
+                                    <td>0.2536</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="app-footer">
+            <p>Built with Pure JS and Python Serverless. Optimized for Vercel deployment.</p>
+        </footer>
+    </div>
+
+    <!-- Load compiled XGBoost model -->
+    <script src="xgboost_model.js"></script>
+    <!-- Load SPA Controller -->
+    <script src="app.js"></script>
+</body>
+</html>
